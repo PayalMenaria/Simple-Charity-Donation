@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract CharityDonationPool {
+    address public owner = msg.sender;
+    uint256 public totalDonations;
+    
+    event DonationReceived(address indexed donor, uint256 amount);
+    event FundsWithdrawn(address indexed owner, uint256 amount);
+    
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not the contract owner");
+        _;
+    }
+    
+    function donate() external payable {
+        require(msg.value > 0, "Donation must be greater than zero");
+        totalDonations += msg.value;
+        emit DonationReceived(msg.sender, msg.value);
+    }
+    
+    function withdraw(uint256 amount) external onlyOwner {
+        require(amount <= address(this).balance, "Insufficient balance");
+        payable(owner).transfer(amount);
+        emit FundsWithdrawn(owner, amount);
+    }
+    
+    function getBalance() external view returns (uint256) {
+        return address(this).balance;
+    }
+}
